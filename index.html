@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<script>
+  if('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Bloco de Anotação · Calculadora Auxiliar</title>
+<!-- Google Fonts + Font Awesome 6 -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(145deg, #e0eafc 0%, #cfdef3 100%);
+    min-height: 100vh;
+    padding: 24px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    max-width: 680px;
+    width: 100%;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 2rem;
+    box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255,255,255,0.5);
+    overflow: hidden;
+}
+
+.app-header {
+    background: white;
+    padding: 1.5rem 1.5rem 0.8rem 1.5rem;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.app-header h1 {
+    font-size: 1.65rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #1e2b3c, #2c4c6e);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.app-header h1 i {
+    color: #2c6e4f;
+    font-size: 1.8rem;
+}
+
+.datetime-panel {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    gap: 12px;
+    background: #f8fafc;
+    padding: 10px 14px;
+    border-radius: 28px;
+}
+
+.date-box, .time-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    background: white;
+    padding: 5px 14px;
+    border-radius: 40px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.form-card {
+    padding: 1.2rem 1.5rem 0.8rem 1.5rem;
+    background: #ffffff;
+}
+
+.input-group {
+    margin-bottom: 12px;
+}
+
+.input-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon i {
+    position: absolute;
+    left: 14px;
+    color: #8ba0b0;
+}
+
+.input-icon input {
+    width: 100%;
+    padding: 14px 14px 14px 42px;
+    font-size: 0.95rem;
+    border: 1.5px solid #e2edf2;
+    border-radius: 1.5rem;
+    background: #fefefe;
+    transition: 0.2s;
+    outline: none;
+}
+
+.input-icon input:focus {
+    border-color: #2c6e4f;
+    box-shadow: 0 0 0 3px rgba(44,110,79,0.15);
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    margin: 16px 0 6px 0;
+}
+
+.btn {
+    flex: 1;
+    padding: 12px 8px;
+    border: none;
+    border-radius: 2rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-primary {
+    background: #2c6e4f;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #235f44;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #eef2ff;
+    color: #1e3b4a;
+    border: 1px solid #dce5ec;
+}
+
+.lista-section {
+    padding: 0 1.5rem 0.5rem 1.5rem;
+}
+
+.lista-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+}
+
+.item-count {
+    background: #e9f0f5;
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #235f44;
+}
+
+.lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.item {
+    background: white;
+    border-radius: 1.2rem;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #edf2f7;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 2;
+}
+
+.item-nome {
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.item-data {
+    font-size: 0.7rem;
+    background: #f0f4f9;
+    padding: 2px 8px;
+    border-radius: 20px;
+    color: #4c6a7e;
+}
+
+.item-valor {
+    font-weight: 600;
+    color: #2c6e4f;
+    background: #eef6f0;
+    padding: 3px 12px;
+    border-radius: 30px;
+    width: fit-content;
+}
+
+.acoes {
+    display: flex;
+    gap: 8px;
+}
+
+.acoes button {
+    background: #f8fafc;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 40px;
+    cursor: pointer;
+}
+
+.total-card {
+    margin: 12px 1.5rem 1rem 1.5rem;
+    background: linear-gradient(115deg, #f1f9f4, white);
+    border-radius: 1.5rem;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #ddebe4;
+}
+
+.total-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1f4d3a;
+}
+
+/* Calculadora independente */
+.calc-wrapper {
+    padding: 0 1.5rem 1rem 1.5rem;
+}
+
+.calc-card {
+    background: #1e2a36;
+    border-radius: 1.8rem;
+    padding: 1rem;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.calc-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #c0dfe8;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #2e4353;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.calc-display {
+    background: #0f1a1f;
+    border-radius: 1.2rem;
+    padding: 16px 18px;
+    margin-bottom: 18px;
+    text-align: right;
+}
+
+.calc-display input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #e0f2fe;
+    text-align: right;
+    outline: none;
+    font-family: monospace;
+}
+
+.calc-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.calc-btn {
+    background: #2a3b47;
+    border: none;
+    padding: 14px 0;
+    border-radius: 1.2rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #eef4ff;
+    cursor: pointer;
+    transition: 0.05s linear;
+}
+
+.calc-btn:active {
+    transform: scale(0.96);
+    background: #1e2f3a;
+}
+
+.calc-btn.op {
+    background: #3e6b5c;
+}
+
+.calc-btn.equal {
+    background: #2c6e4f;
+    grid-column: span 2;
+}
+
+.calc-btn.clear {
+    background: #ab5a4e;
+}
+
+.recibo-wrapper {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+}
+
+.recibo {
+    background: #0f1722;
+    border-radius: 1.4rem;
+    padding: 1rem;
+    font-family: monospace;
+    color: #b9f6ca;
+    border: 1px solid #2a3a44;
+    display: none;
+}
+
+.recibo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed #3e5a67;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+.close-recibo {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+
+.recibo pre {
+    white-space: pre-line;
+    font-size: 0.75rem;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 32px 16px;
+    color: #7f9ab0;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="app-header">
+        <h1><i class="fas fa-pen-fancy"></i> Bloco de Anotação</h1>
+        <div class="datetime-panel">
+            <div class="date-box"><i class="far fa-calendar-alt"></i> <span id="dataAtual">--/--/----</span></div>
+            <div class="time-box"><i class="far fa-clock"></i> <span id="horaAtual">--:--:--</span></div>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <div class="input-group">
+            <div class="input-icon"><i class="fas fa-tag"></i><input type="text" id="nome" placeholder="Nome do item" autocomplete="off"></div>
+        </div>
+        <div class="input-group">
+            <div class="input-icon"><i class="fas fa-dollar-sign"></i><input type="number" id="valor" placeholder="Valor (R$)" step="0.01"></div>
+        </div>
+        <div class="button-group">
+            <button class="btn btn-primary" onclick="adicionar()"><i class="fas fa-plus-circle"></i> Adicionar</button>
+            <button class="btn btn-secondary" onclick="gerarRecibo()"><i class="fas fa-receipt"></i> Gerar Recibo</button>
+        </div>
+    </div>
+
+    <div class="lista-section">
+        <div class="lista-title"><span><i class="fas fa-list-ul"></i> Itens (com data)</span><span class="item-count" id="contadorItens">0 itens</span></div>
+        <div class="lista" id="lista"></div>
+    </div>
+
+    <div class="total-card">
+        <div class="total-label"><i class="fas fa-coins"></i> TOTAL GERAL</div>
+        <div class="total-value">R$ <span id="total">0.00</span></div>
+    </div>
+
+    <!-- CALCULADORA AUXILIAR (sem interferência) -->
+    <div class="calc-wrapper">
+        <div class="calc-card">
+            <div class="calc-header"><i class="fas fa-calculator"></i> Calculadora auxiliar</div>
+            <div class="calc-display"><input type="text" id="calcScreen" readonly value="0"></div>
+            <div class="calc-buttons">
+                <button class="calc-btn clear" onclick="calcClear()">C</button>
+                <button class="calc-btn" onclick="calcInput('/')">÷</button>
+                <button class="calc-btn" onclick="calcInput('*')">×</button>
+                <button class="calc-btn" onclick="calcBackspace()">⌫</button>
+                
+                <button class="calc-btn" onclick="calcInput('7')">7</button>
+                <button class="calc-btn" onclick="calcInput('8')">8</button>
+                <button class="calc-btn" onclick="calcInput('9')">9</button>
+                <button class="calc-btn op" onclick="calcInput('-')">-</button>
+                
+                <button class="calc-btn" onclick="calcInput('4')">4</button>
+                <button class="calc-btn" onclick="calcInput('5')">5</button>
+                <button class="calc-btn" onclick="calcInput('6')">6</button>
+                <button class="calc-btn op" onclick="calcInput('+')">+</button>
+                
+                <button class="calc-btn" onclick="calcInput('1')">1</button>
+                <button class="calc-btn" onclick="calcInput('2')">2</button>
+                <button class="calc-btn" onclick="calcInput('3')">3</button>
+                <button class="calc-btn equal" onclick="calcResult()">=</button>
+                
+                <button class="calc-btn" onclick="calcInput('0')">0</button>
+                <button class="calc-btn" onclick="calcInput('.')">.</button>
+                <button class="calc-btn" onclick="calcPercent()">%</button>
+                <button class="calc-btn op" onclick="calcClearEntry()">CE</button>
+            </div>
+            <div style="font-size: 0.7rem; text-align: center; margin-top: 10px; color:#8fa6b5;">
+                <i class="fas fa-info-circle"></i> Apenas cálculos — não interfere nos campos
+            </div>
+        </div>
+    </div>
+
+    <div class="recibo-wrapper">
+        <div class="recibo" id="recibo"></div>
+    </div>
+</div>
+
+<script>
+    // ========== PEDIDOS ==========
+    let pedidos = JSON.parse(localStorage.getItem("pedidos")) || [];
+
+    function obterDataAtual() {
+        const hoje = new Date();
+        const dia = String(hoje.getDate()).padStart(2,'0');
+        const mes = String(hoje.getMonth()+1).padStart(2,'0');
+        const ano = hoje.getFullYear();
+        return `${dia}/${mes}/${ano}`;
+    }
+
+    function migrarItensAntigos() {
+        let modificado = false;
+        for(let i=0; i<pedidos.length; i++) {
+            if(!pedidos[i].data) {
+                pedidos[i].data = obterDataAtual();
+                modificado = true;
+            }
+        }
+        if(modificado) salvar();
+    }
+
+    function salvar() { localStorage.setItem("pedidos", JSON.stringify(pedidos)); }
+
+    function escapeHtml(str) {
+        if(!str) return "";
+        return str.replace(/[&<>]/g, function(m) {
+            if(m==='&') return '&amp;';
+            if(m==='<') return '&lt;';
+            if(m==='>') return '&gt;';
+            return m;
+        });
+    }
+
+    function atualizarTela() {
+        const listaDiv = document.getElementById("lista");
+        const totalSpan = document.getElementById("total");
+        const contadorSpan = document.getElementById("contadorItens");
+        if(!listaDiv) return;
+        listaDiv.innerHTML = "";
+        let total = 0;
+        if(pedidos.length === 0) {
+            listaDiv.innerHTML = `<div class="empty-message"><i class="fas fa-box-open"></i> Nenhum pedido ainda</div>`;
+            totalSpan.innerText = "0.00";
+            contadorSpan.innerText = "0 itens";
+            return;
+        }
+        pedidos.forEach((item, idx) => {
+            total += item.valor;
+            const dataExib = item.data || "data não definida";
+            const divItem = document.createElement("div");
+            divItem.className = "item";
+            divItem.innerHTML = `
+                <div class="item-info">
+                    <div class="item-nome"><i class="fas fa-cube"></i> ${escapeHtml(item.nome)} <span class="item-data"><i class="far fa-calendar-check"></i> ${escapeHtml(dataExib)}</span></div>
+                    <span class="item-valor">R$ ${item.valor.toFixed(2)}</span>
+                </div>
+                <div class="acoes">
+                    <button onclick="editar(${idx})"><i class="fas fa-pen"></i> Editar</button>
+                    <button onclick="remover(${idx})"><i class="fas fa-trash-alt"></i> Remover</button>
+                </div>
+            `;
+            listaDiv.appendChild(divItem);
+        });
+        totalSpan.innerText = total.toFixed(2);
+        contadorSpan.innerText = `${pedidos.length} ${pedidos.length===1?"item":"itens"}`;
+    }
+
+    function adicionar() {
+        const nome = document.getElementById("nome").value.trim();
+        const valor = parseFloat(document.getElementById("valor").value);
+        if(!nome || isNaN(valor) || valor <= 0) {
+            alert("Preencha nome e valor válido (>0)");
+            return;
+        }
+        pedidos.push({ nome, valor, data: obterDataAtual() });
+        salvar();
+        atualizarTela();
+        document.getElementById("nome").value = "";
+        document.getElementById("valor").value = "";
+        document.getElementById("nome").focus();
+        document.getElementById("recibo").style.display = "none";
+    }
+
+    function remover(idx) {
+        pedidos.splice(idx,1);
+        salvar();
+        atualizarTela();
+        document.getElementById("recibo").style.display = "none";
+    }
+
+    function editar(idx) {
+        if(!pedidos[idx]) return;
+        const item = pedidos[idx];
+        const novoNome = prompt("Editar nome:", item.nome);
+        if(novoNome === null) return;
+        const novoValor = parseFloat(prompt("Editar valor (R$):", item.valor));
+        if(novoNome && novoNome.trim()!=="" && !isNaN(novoValor) && novoValor>0) {
+            pedidos[idx] = { nome: novoNome.trim(), valor: novoValor, data: item.data };
+            salvar();
+            atualizarTela();
+            document.getElementById("recibo").style.display = "none";
+        } else alert("Nome ou valor inválido.");
+    }
+
+    function hideRecibo() { document.getElementById("recibo").style.display = "none"; }
+
+    function gerarRecibo() {
+        if(pedidos.length === 0) { alert("Nenhum item para recibo."); return; }
+        const agora = new Date();
+        const dataEmissao = `${agora.toLocaleDateString('pt-BR')} ${agora.toLocaleTimeString('pt-BR')}`;
+        let linha = "";
+        let totalGeral = 0;
+        pedidos.forEach((item, i) => {
+            linha += `${i+1}. ${item.nome.padEnd(18)} | Data: ${item.data} | R$ ${item.valor.toFixed(2)}\n`;
+            totalGeral += item.valor;
+        });
+        const texto = `🧾 RECIBO\n📅 Emissão: ${dataEmissao}\n──────────────────────────\n${linha}\n──────────────────────────\n💰 TOTAL: R$ ${totalGeral.toFixed(2)}`;
+        const recDiv = document.getElementById("recibo");
+        recDiv.style.display = "block";
+        recDiv.innerHTML = `<div class="recibo-header"><strong><i class="fas fa-receipt"></i> COMPROVANTE</strong><button class="close-recibo" onclick="hideRecibo()">&times;</button></div><pre>${texto}</pre>`;
+    }
+
+    // ========== RELÓGIO ==========
+    function atualizarDataHora() {
+        const agora = new Date();
+        const dia = String(agora.getDate()).padStart(2,'0');
+        const mes = String(agora.getMonth()+1).padStart(2,'0');
+        const ano = agora.getFullYear();
+        document.getElementById("dataAtual").innerText = `${dia}/${mes}/${ano}`;
+        const horas = String(agora.getHours()).padStart(2,'0');
+        const minutos = String(agora.getMinutes()).padStart(2,'0');
+        const segundos = String(agora.getSeconds()).padStart(2,'0');
+        document.getElementById("horaAtual").innerText = `${horas}:${minutos}:${segundos}`;
+    }
+    setInterval(atualizarDataHora, 1000);
+    atualizarDataHora();
+
+    // ========== CALCULADORA INDEPENDENTE (sem eventos globais) ==========
+    let calcExpression = "";
+
+    function updateScreen() {
+        const screen = document.getElementById("calcScreen");
+        if(screen) screen.value = calcExpression === "" ? "0" : calcExpression;
+    }
+
+    function calcInput(value) {
+        if(calcExpression === "0" && !isNaN(value) && value !== '.') calcExpression = value;
+        else calcExpression += value;
+        updateScreen();
+    }
+
+    function calcClear() {
+        calcExpression = "";
+        updateScreen();
+    }
+
+    function calcClearEntry() {
+        calcExpression = "";
+        updateScreen();
+    }
+
+    function calcBackspace() {
+        calcExpression = calcExpression.slice(0, -1);
+        updateScreen();
+    }
+
+    function calcResult() {
+        if(calcExpression === "") return;
+        try {
+            let expr = calcExpression.replace(/×/g, '*').replace(/÷/g, '/');
+            let result = eval(expr);
+            if(isNaN(result) || !isFinite(result)) throw new Error();
+            calcExpression = String(result);
+            updateScreen();
+        } catch(e) {
+            alert("Expressão inválida");
+            calcClear();
+        }
+    }
+
+    function calcPercent() {
+        try {
+            let expr = calcExpression.replace(/×/g, '*').replace(/÷/g, '/');
+            let val = eval(expr);
+            if(isNaN(val)) throw new Error();
+            let percent = val / 100;
+            calcExpression = String(percent);
+            updateScreen();
+        } catch(e) { alert("Erro no cálculo de %"); }
+    }
+
+    // Inicialização
+    migrarItensAntigos();
+    atualizarTela();
+</script>
+</body>
+</html>
